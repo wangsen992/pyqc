@@ -13,3 +13,7 @@ from .utils import *
 @pd.api.extensions.register_series_accessor("qc")
 class QualityControlSeriesAccessor(QualityControlBaseAccessor):
     pass
+
+@pd.api.extensions.register_dataframe_accessor("qc")
+class QualityControlDataFrameAccessor(QualityControlBaseAccessor):
+    pass

@@ -4,6 +4,7 @@ import pandas as pd
 import scipy.interpolate as interp
 import scipy.fftpack as fft
 
+
 def spike_mask(x, window, stride, factor=3.5):
     '''Create a mask on x where spikes are True based on running mean and std. 
 
@@ -11,6 +12,17 @@ def spike_mask(x, window, stride, factor=3.5):
     pd.Series.'''
 
     pass
+
+def series_rolling(x, window, stride):
+    window_size = math.floor(window / x.index.freq)
+    stride_size = math.floor(stride / x.index.freq) 
+    end_index = x.shape[0] - window_size
+
+    if stride_size == 0: 
+        stride_size =1
+
+    for i in np.arange(0, end_index, stride_size):
+        yield x.iloc[i: i + window_size]
 
 def spike_flags(x,
                 window='2T',
