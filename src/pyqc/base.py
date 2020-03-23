@@ -1,9 +1,6 @@
-import math
 import copy
 import numpy as np
 import pandas as pd
-import scipy.interpolate as interp
-import scipy.fftpack as fft
 import ipdb as debugger
 
 from .utils import *
@@ -21,11 +18,11 @@ class QualityControlBaseAccessor:
         if not isinstance(obj.index, 
                           (pd.core.indexes.datetimes.DatetimeIndex,
                            pd.core.indexes.timedeltas.TimedeltaIndex)):
-            raise IndexError("DatetimeIndex/TimedeltaIndex must be used."\
+            raise AttributeError("DatetimeIndex/TimedeltaIndex must be used."\
                             +"Current index type is {}".format(type(obj.index)))
 
         if len(set(obj.index[1:] - obj.index[:-1])) != 1:
-            raise IndexError("Ensure index is equally spaced.")
+            raise AttributeError("Ensure index is equally spaced.")
 
     def _init_qc_options(self):
         self._options = dict()
@@ -62,51 +59,52 @@ class QualityControlBaseAccessor:
 
     # Spike detection
     @property
-    def spike_indice(self):
-        if (not hasattr(self, '_spike_indice')) or self.option_is_updated:
-            self._compute_spike_indice(inplace=True)
-        return self._spike_indice
+    def spike_mask(self):
+        if (not hasattr(self, '_spike_mask')) or self.option_is_updated:
+            self._compute_spike_mask(inplace=True)
+        return self._spike_mask
 
     def despike(self, inplace=False):
         if inplace == True:
-            self._obj[self.spike_indice] = np.nan
+            self._obj[self.spike_mask] = np.nan
         else:
-            new_ser = self._obj.copy()
-            new_ser[self.spike_indice] = np.nan
-            return new_ser
+            new_obj = self._obj.copy()
+            new_obj[self.spike_mask] = np.nan
+            return new_obj
 
-    def _compute_spike_indice(self,
-                              inplace=False):
+    def _compute_spike_mask(self,
+                            inplace=False):
 
-        spike_indice = spike_flags(self._obj,
-                                   window=self._options['spike_window'], 
-                                   stride=self._options['spike_stride'], 
-                                   factor=self._options['spike_factor'])
+        _spike_mask = compute_spike_mask(self._obj,
+                                         window=self._options['spike_window'], 
+                                         stride=self._options['spike_stride'], 
+                                         factor=self._options['spike_factor'])
 
         if inplace == True:
-            self._spike_indice = spike_indice
+            self._spike_mask = _spike_mask
         else:
-            return spike_indice
+            return _spike_mask
 
     # Amplitude resolution and dropouts detection
     @property
-    def hist_indice(self):
-        if not hasattr(self, '_hist_indice') or self.option_is_updated:
-            self._compute_hist_indice(inplace=True)
-        return self._hist_indice
+    def hist_mask(self):
+        if not hasattr(self, '_hist_mask') or self.option_is_updated:
+            self._compute_hist_mask(inplace=True)
+        return self._hist_mask
 
-    def _compute_hist_indice(self,
+    def _compute_hist_mask(self,
                           inplace=False):
 
-        hist_indice = hist_based_flags(self._obj, 
+        hist_mask = hist_based_mask_func[type(self._obj)]\
+                                       (self._obj, 
                                        window=self._options['hist_window'], 
                                        bins=self._options['hist_bins'], 
                                        pct_thres=self._options['hist_pct_thres'])
 
         if inplace == True:
-            self._hist_indice = hist_indice
+            self._hist_mask = hist_mask
         else:
-            return hist_indice
+            return hist_mask
 
 
     # Measure single variable nonstationarity by comparing normalized rolling
@@ -128,14 +126,4 @@ class QualityControlBaseAccessor:
             return stationarity_measure
 
     def describe(self):
-        out_dict =  dict(mean = self._obj.mean(),
-                        std = self._obj.std(),
-                        skew= self._obj.skew(),
-                        kurt= self._obj.kurtosis(),
-                        pct_null = self._obj.isna().sum()/self._obj.size,
-                        stationarity_measure = self.stationarity_measure,
-                        pct_spike_flag = len(self.spike_indice)/self._obj.size,
-                        pct_hist_flag = len(self.hist_indice)/self._obj.size)
-
-        return pd.Series(out_dict, name=self._obj.name)
-
+        raise NotImplementedError("Should not call directly from base class")
