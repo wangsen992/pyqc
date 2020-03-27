@@ -1,3 +1,5 @@
+'''Base class for quality control accessor on dataframes and series'''
+
 import copy
 import numpy as np
 import pandas as pd
@@ -14,7 +16,7 @@ class QualityControlBaseAccessor:
 
     @staticmethod
     def _validate(obj):
-        # Validate on what? 
+        # Validate input index is 
         if not isinstance(obj.index, 
                           (pd.core.indexes.datetimes.DatetimeIndex,
                            pd.core.indexes.timedeltas.TimedeltaIndex)):
