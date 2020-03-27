@@ -16,13 +16,7 @@ class QualityControlBaseAccessor:
 
     @staticmethod
     def _validate(obj):
-        # Validate input index is 
-        if not isinstance(obj.index, 
-                          (pd.core.indexes.datetimes.DatetimeIndex,
-                           pd.core.indexes.timedeltas.TimedeltaIndex)):
-            raise AttributeError("DatetimeIndex/TimedeltaIndex must be used."\
-                            +"Current index type is {}".format(type(obj.index)))
-
+        # Validate and enforce input index is equally spaced.
         if len(set(obj.index[1:] - obj.index[:-1])) != 1:
             raise AttributeError("Ensure index is equally spaced.")
 
