@@ -20,6 +20,8 @@ class QualityControlBaseAccessor:
         if len(set(obj.index[1:] - obj.index[:-1])) != 1:
             raise AttributeError("Ensure index is equally spaced.")
 
+    # Quality Control options
+    # Internal states for qc operations. Provide update and reset options.
     def _init_qc_options(self):
         self._options = dict()
         # compute original data info
