@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
-import ipdb as debugger
 
 def summarize_qc_resamples(input_df, verbose=False, **resample_kwargs):
 
