@@ -25,8 +25,12 @@ def pd_rolling(x, window, stride, resolution=None):
         except ValueError:
             raise ValueError("Input window & stride must either be real or"\
                             + "offset strings")
-        window_size = math.floor(window / x.index.freq)
-        stride_size = math.floor(stride / x.index.freq) 
+        if not x.index.freq:
+            freq = x.index[1] - x.index[0]
+        else:
+            freq = x.index.freq
+        window_size = math.floor(window / freq)
+        stride_size = math.floor(stride / freq) 
 
     # For real-valued index
     elif resolution:
